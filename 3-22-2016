@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
+//import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CANTalon.FeedbackDevice;
@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -51,7 +52,7 @@ public class Robot extends IterativeRobot {
     //Lift
     chicken, turkey, goose;
     
-    AnalogGyro gyro;
+    //AnalogGyro gyro;
 
     boolean obstacleDone, autonDone, encodersDone, portBool, liftBool, camBool, CAMAuto;
     Encoder enc, liftEnc;
@@ -70,6 +71,8 @@ public class Robot extends IterativeRobot {
     camSafety, safetyBool;
     
     DigitalInput CAMSensor;
+    DigitalInput LeftHookSwitch;
+    DigitalInput RightHookSwitch;
     
     
     public void robotInit() {
@@ -109,18 +112,23 @@ public class Robot extends IterativeRobot {
         enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
         liftEnc = new Encoder(2, 3, false, Encoder.EncodingType.k4X);
         
-        gyro = new AnalogGyro(0);
+        //gyro = new AnalogGyro(0);
     	//gyro.calibrate();
     	
-        //Timer
+        //Timers
         autonTime = new Timer();
         liftTime = new Timer();
         portTime = new Timer();
         CAMTime = new Timer();
         CAMAuto = false;
-        CAMSensor = new DigitalInput(4);
         camSafety = .25;
         liftBool = false;
+
+        //Digital Sensors
+        LeftHookSwitch = new DigitalInput(2);
+        RightHookSwitch = new DigitalInput(3);
+        CAMSensor = new DigitalInput(5);
+        
         
         goose.enable();
         CameraServer.getInstance().setQuality(50);
@@ -140,7 +148,7 @@ public class Robot extends IterativeRobot {
      autonLoop = 1;
      driveToObstacle = 7350;
      autonTime.start();
-     gyro.reset();
+     //gyro.reset();
     }
 
     /**
@@ -267,7 +275,7 @@ public class Robot extends IterativeRobot {
             	 //autonDrive(0);
              }
     	 }
-    	 else if(gyro.getAngle() < -14){
+    	 /**else if(gyro.getAngle() < -14){
     		 autonDrive(-.7);
     	 }
     	 /**
@@ -339,7 +347,7 @@ public class Robot extends IterativeRobot {
             	 //autonDrive(0);
              }
     	 }
-    	 else if(gyro.getAngle() < -17){
+    	 /**else if(gyro.getAngle() < -17){
     		 autonLoop = 3;
     		 autonDrive(-.55);
     	 }
@@ -540,12 +548,14 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopInit(){
-    	gyro.reset();
+    	//gyro.reset();
     }
     public void teleopPeriodic() {	
-        SmartDashboard.putNumber("Gyro", gyro.getAngle());
+        //SmartDashboard.putNumber("Gyro", gyro.getAngle());
     	SmartDashboard.putBoolean("Sensor CAM", CAMSensor.get());
     	SmartDashboard.putNumber("AutonLoop", autonLoop);
+    	SmartDashboard.putBoolean("Left Hook", LeftHookSwitch.get());
+    	SmartDashboard.putBoolean("Right Hook", RightHookSwitch.get());
     	
     	drivebase();
         armDrive();
