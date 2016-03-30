@@ -1,5 +1,10 @@
 package org.usfirst.frc.team904.robot;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CANTalon.FeedbackDevice;
@@ -31,7 +36,7 @@ public class Robot extends IterativeRobot {
     final String nullMove = "Don't Go";
     final String positionTwo = "Position Two";
     final String positionThree = "Position Three";
-    final String positionFour = "Position Four";
+    final String positionFour = "Position Four"; 
     final String positionFive = "Position Five";
     final String doNothing = "Do Nothing";
 
@@ -45,6 +50,9 @@ public class Robot extends IterativeRobot {
     ostrich, emu,
     //Lift
     chicken, turkey, goose;
+    
+    AnalogGyro gyro;
+
     boolean obstacleDone, autonDone, encodersDone, portBool, liftBool, camBool, CAMAuto;
     Encoder enc, liftEnc;
     Timer autonTime, liftTime, portTime, CAMTime;
@@ -100,6 +108,10 @@ public class Robot extends IterativeRobot {
         //Encoders
         enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
         liftEnc = new Encoder(2, 3, false, Encoder.EncodingType.k4X);
+        
+        gyro = new AnalogGyro(0);
+    	//gyro.calibrate();
+    	
         //Timer
         autonTime = new Timer();
         liftTime = new Timer();
@@ -113,8 +125,8 @@ public class Robot extends IterativeRobot {
         goose.enable();
         CameraServer.getInstance().setQuality(50);
         CameraServer.getInstance().startAutomaticCapture("cam0");
-        }
-    
+
+    }
     public void autonomousInit() {
      autoSelected = (String) chooser.getSelected();
      positionSelected = (String) positionChooser.getSelected();
@@ -128,6 +140,7 @@ public class Robot extends IterativeRobot {
      autonLoop = 1;
      driveToObstacle = 7350;
      autonTime.start();
+     gyro.reset();
     }
 
     /**
@@ -248,15 +261,28 @@ public class Robot extends IterativeRobot {
     //Should drive to obstacle
      case chevalDeFrise:
     	 if(autonLoop == 1){
-    		 autonDrive(-.3);
-    		 if(hawk.getPosition() < -(driveToObstacle + 100)){
+    		 autonDrive(-.2);
+    		 if(hawk.getPosition() < -(100)){
             	 autonLoop = 2;
-            	 autonDrive(0);
+            	 //autonDrive(0);
              }
     	 }
-    	 else{
+    	 else if(gyro.getAngle() < -14){
+    		 autonDrive(-.7);
+    	 }
+    	 /**
+    	 else if(gyro.getAngle() > -7){
+    		 autonDrive(-.4);
+    	 }
+    	 else if(gyro.getAngle() > -2){
     		 autonDrive(0);
     	 }
+    	 else if(hawk.getPosition() < -(driveToObstacle + 20000)){
+    		 autonDrive(0);
+      	 }
+    	 else{
+    		 autonDrive(0);
+    	 }**/
     	 //Drive to thing
     	//lower arms to put things to the floor
     	 	//stop this when the current pull is higher?
@@ -265,7 +291,7 @@ public class Robot extends IterativeRobot {
     	//keep driving
     	 break;
      //I THINK this works- should be tested.
-     case moat:
+     case moat: 
     	 if(hawk.getPosition() > -driveToObstacle && autonLoop == 1){
     		 autonDrive(-.3);
     		 if(hawk.getPosition() < -(driveToObstacle - 100)){
@@ -307,6 +333,20 @@ public class Robot extends IterativeRobot {
       //Not Done Yet
      case rockWall:
     	 if(autonLoop == 1){
+    		 autonDrive(-.25);
+    		 if(hawk.getPosition() < -(100)){
+            	 autonLoop = 2;
+            	 //autonDrive(0);
+             }
+    	 }
+    	 else if(gyro.getAngle() < -17){
+    		 autonLoop = 3;
+    		 autonDrive(-.55);
+    	 }
+    	 /**else if(gyro.getAngle() > -17 && autonLoop ==3){
+    		 autonDrive(-.65);
+    	 }
+    	 /**if(autonLoop == 1){
     		 autonDrive(-.4);
     		 if(hawk.getPosition() < -(driveToObstacle + 500)){
             	 autonLoop = 2;
@@ -332,7 +372,7 @@ public class Robot extends IterativeRobot {
    	 else{
    	   	  autonDrive(0.0);
    	      obstacleDone = true;
-   	     }
+   	     }**/
      break;
     //RoughtTerrain not done yet- Might need to go faster
      case roughTerrain:
@@ -499,9 +539,14 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during operator control
      */
+    public void teleopInit(){
+    	gyro.reset();
+    }
     public void teleopPeriodic() {	
+        SmartDashboard.putNumber("Gyro", gyro.getAngle());
     	SmartDashboard.putBoolean("Sensor CAM", CAMSensor.get());
     	SmartDashboard.putNumber("AutonLoop", autonLoop);
+    	
     	drivebase();
         armDrive();
         armPush();
